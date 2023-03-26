@@ -14,8 +14,6 @@ let settings = {},
     tim,
     dc,
     faceApiLoaded = false,
-    buttons = $(".buttons")[0],
-    chat = $(".chat")[0],
     resize,
     language = window.navigator.language.slice(0, 2),
     timeout,
@@ -65,21 +63,6 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
             settings = result;
         });
 });
-
-
-try {
-    let new_el = $(document.createElement("div"))
-
-    new_el[0].innerHTML = chrome.i18n.getMessage("loginWindow")
-
-    new_el[0].style.marginTop = "15px"
-    new_el[0].style.marginBottom = "15px"
-
-    new_el.insertAfter(document.querySelector('[data-tr="sign_in_to"]'))
-    $(".login-popup__item.right")[0].style.overflowY = "auto"
-} catch (e) {
-    console.dir(e)
-}
 
 
 // remove later
@@ -655,360 +638,384 @@ function switchMode() {
     })
 }
 
-chrome.storage.sync.get(null, function (result) {
-    Sentry.wrap(function () {
-        settings = result;
+document.arrive(".buttons__button.start-button", {onceOnly: true, existing: true}, () => {
 
-        let switchModeButton = createElement('button', {
-            onclick: () => {
-                switchMode()
-            },
-        }, [
-            createElement('b', {
-                innerText: chrome.i18n.getMessage("switchModeButtonText")
-            })
-        ])
+    buttons = $(".buttons")[0]
+    chat = $(".chat")[0]
 
-        if (settings.askForMode) {
-            switchMode()
-            return
-        } else {
-            if (settings.minimalism) {
-                $(createElement('p', {
-                    id: "remoteIP", style: "display: none;"
-                })).appendTo($("body"))
+    try {
+        let new_el = $(document.createElement("div"))
 
-                const onChangeStageMinimalism = function (mutations) {
-                    mutations.forEach(function (mutation) {
-                        if (mutation.attributeName === "class") {
-                            const attributeValue = $(mutation.target).prop(mutation.attributeName);
-                            if (attributeValue.includes("s-search")) {
-                                if (remoteIP.innerText !== "")
-                                    remoteIP.innerText = "-"
-                                curIps = []
-                            } else if (attributeValue.includes("s-stop")) {
-                                if (remoteIP.innerText !== "")
-                                    remoteIP.innerText = "-"
-                                curIps = []
-                            }
-                        }
-                    });
-                }
+        new_el[0].innerHTML = chrome.i18n.getMessage("loginWindow")
 
-                var observer3 = new MutationObserver(onChangeStageMinimalism)
-                observer3.observe(document.getElementById('remote-video-wrapper'), {attributes: true});
+        new_el[0].style.marginTop = "15px"
+        new_el[0].style.marginBottom = "15px"
 
-                const observer = new MutationObserver(onUpdateIP)
-                observer.observe(document.getElementById('remoteIP'), {
-                    attributes: true,
-                    childList: true,
-                    characterData: true
-                });
+        new_el.insertAfter(document.querySelector('[data-tr="sign_in_to"]'))
+        $(".login-popup__item.right")[0].style.overflowY = "auto"
+    } catch (e) {
+        console.dir(e)
+    }
 
-                if ($("[data-tr=\"rules\"]").length === 1) {
-                    $("<br><br>").appendTo($(".message-bubble")[0])
-                    $(switchModeButton).appendTo($(".message-bubble")[0])
-                    checkApi()
-                }
+    chrome.storage.sync.get(null, function (result) {
+        Sentry.wrap(function () {
+            settings = result;
 
-                $(document).arrive("[data-tr=\"rules\"]", function (el) {
-                    $("<br><br>").appendTo($(".message-bubble")[0])
-                    $(switchModeButton).appendTo($(".message-bubble")[0])
-                    checkApi()
+            let switchModeButton = createElement('button', {
+                onclick: () => {
+                    switchMode()
+                },
+            }, [
+                createElement('b', {
+                    innerText: chrome.i18n.getMessage("switchModeButtonText")
                 })
+            ])
 
-                return true
-            }
-        }
+            if (settings.askForMode) {
+                switchMode()
+                return
+            } else {
+                if (settings.minimalism) {
+                    $(createElement('p', {
+                        id: "remoteIP", style: "display: none;"
+                    })).appendTo($("body"))
 
-        if ($("[data-tr=\"rules\"]").length === 1) {
-            $("<br><br>").appendTo($(".message-bubble")[0])
-            $(switchModeButton).appendTo($(".message-bubble")[0])
-        }
-
-        $(document).arrive("[data-tr=\"rules\"]", function (el) {
-            $("<br><br>").appendTo($(".message-bubble")[0])
-            $(switchModeButton).appendTo($(".message-bubble")[0])
-            $(document).unbindArrive("[data-tr=\"rules\"]");
-        });
-
-        (document.head || document.documentElement).appendChild(c);
-        (document.head || document.documentElement).appendChild(cs);
-        (document.head || document.documentElement).appendChild(css);
-
-        document.getElementsByClassName('buttons__button start-button')[0].addEventListener("click", (e) => {
-            if (stage === 3)
-                settings.stats.countManSkip++
-
-            clearTimeout(timeout)
-        })
-
-        document.getElementsByClassName('buttons__button stop-button')[0].addEventListener("click", (e) => {
-            if (e.pointerType !== "") {
-                remoteInfo.innerHTML = chrome.i18n.getMessage("main")
-                checkApi()
-            }
-            clearTimeout(timeout)
-        })
-
-        injectInterface()
-
-        setInterval(() => {
-            if (document.getElementsByClassName("remoteTM").length > 0) {
-                if (localStage.innerText === "3") {
-                    for (let el of document.getElementsByClassName("remoteTM")) {
-                        el.innerText = secondsToHms(+new Date() / 1000 - startDate)
-                    }
-                }
-            }
-            if (document.getElementsByClassName("remoteTZ").length > 0 && document.getElementsByClassName("remoteTime").length > 0) {
-                for (let el of document.getElementsByClassName("remoteTime")) {
-                    try {
-                        el.innerText = new Date().toLocaleTimeString("ru", {timeZone: $(el).parent().find('.remoteTZ')[0].innerText}).slice(0, -3)
-                    } catch {
-                        el.innerText = "???"
-                    }
-                }
-            }
-        }, 1000)
-
-        checkApi()
-
-        if (settings.hideLogo) {
-            try {
-                document.getElementById("logo-link").style.display = "none"
-            } catch (e) {
-                console.dir(e)
-            }
-        }
-
-        if (settings.hideHeader) {
-            $("#header").hide()
-            app.style.height = "100%"
-            window.dispatchEvent(new Event('resize'));
-        }
-
-        if (settings.hideWatermark || settings.streamer) {
-            try {
-                document.getElementsByClassName("remote-video__watermark")[0].style.display = "none"
-            } catch (e) {
-                console.dir(e)
-            }
-        }
-
-        if (settings.hideBanner || settings.streamer) {
-            try {
-                document.getElementsByClassName("caption remote-video__info")[0].style.display = "none"
-            } catch (e) {
-                console.dir(e)
-            }
-        }
-
-        if (settings.doNotReflect) {
-            $("#local-video").removeClass("video-container-local-video")
-        }
-
-        if (settings.doNotCover) {
-            $("#remote-video").css({"object-fit": "contain"})
-            // $(".preview").css({"background-size": "contain"})
-        }
-
-        if (settings.hideCamera) {
-            $("#local-video-wrapper")[0].style.display = "none"
-        }
-
-        setInterval(() => {
-            if (settings.skipFourSec) {
-                try {
-                    if ((stage === 2) && (found + 4000 < Date.now())) {
-                        console.dir("Skipping due to loading time limit")
-                        document.getElementsByClassName('buttons__button start-button')[0].click()
-                        //settings.stats.countManSkip--
-                    }
-                } catch (e) {
-                    //console.dir(e)
-                }
-            }
-        }, 1000)
-
-        if (settings.autoResume) {
-            document.getElementById('overlay').style.background = "none"
-            // document.getElementById('overlay').style.position = "unset"
-
-            document.getElementById('local-video-warning-popup').style.filter = "opacity(0)"
-            new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                        if (mutation.attributeName === "class") {
-                            if (mutation.target.className.includes("disabled")) {
-                                $(".ok").removeClass("disabled")
-                                document.getElementsByClassName("video-warning__btn")[0].firstElementChild.click()
+                    const onChangeStageMinimalism = function (mutations) {
+                        mutations.forEach(function (mutation) {
+                            if (mutation.attributeName === "class") {
+                                const attributeValue = $(mutation.target).prop(mutation.attributeName);
+                                if (attributeValue.includes("s-search")) {
+                                    if (remoteIP.innerText !== "")
+                                        remoteIP.innerText = "-"
+                                    curIps = []
+                                } else if (attributeValue.includes("s-stop")) {
+                                    if (remoteIP.innerText !== "")
+                                        remoteIP.innerText = "-"
+                                    curIps = []
+                                }
                             }
+                        });
+                    }
+
+                    var observer3 = new MutationObserver(onChangeStageMinimalism)
+                    observer3.observe(document.getElementById('remote-video-wrapper'), {attributes: true});
+
+                    const observer = new MutationObserver(onUpdateIP)
+                    observer.observe(document.getElementById('remoteIP'), {
+                        attributes: true,
+                        childList: true,
+                        characterData: true
+                    });
+
+                    if ($("[data-tr=\"rules\"]").length === 1) {
+                        $("<br><br>").appendTo($(".message-bubble")[0])
+                        $(switchModeButton).appendTo($(".message-bubble")[0])
+                        checkApi()
+                    }
+
+                    $(document).arrive("[data-tr=\"rules\"]", function (el) {
+                        $("<br><br>").appendTo($(".message-bubble")[0])
+                        $(switchModeButton).appendTo($(".message-bubble")[0])
+                        checkApi()
+                    })
+
+                    return true
+                }
+            }
+
+            if ($("[data-tr=\"rules\"]").length === 1) {
+                $("<br><br>").appendTo($(".message-bubble")[0])
+                $(switchModeButton).appendTo($(".message-bubble")[0])
+            }
+
+            $(document).arrive("[data-tr=\"rules\"]", function (el) {
+                $("<br><br>").appendTo($(".message-bubble")[0])
+                $(switchModeButton).appendTo($(".message-bubble")[0])
+                $(document).unbindArrive("[data-tr=\"rules\"]");
+            });
+
+            (document.head || document.documentElement).appendChild(c);
+            (document.head || document.documentElement).appendChild(cs);
+            (document.head || document.documentElement).appendChild(css);
+
+            document.getElementsByClassName('buttons__button start-button')[0].addEventListener("click", (e) => {
+                if (stage === 3)
+                    settings.stats.countManSkip++
+
+                clearTimeout(timeout)
+            })
+
+            document.getElementsByClassName('buttons__button stop-button')[0].addEventListener("click", (e) => {
+                if (e.pointerType !== "") {
+                    remoteInfo.innerHTML = chrome.i18n.getMessage("main")
+                    checkApi()
+                }
+                clearTimeout(timeout)
+            })
+
+            injectInterface()
+
+            setInterval(() => {
+                if (document.getElementsByClassName("remoteTM").length > 0) {
+                    if (localStage.innerText === "3") {
+                        for (let el of document.getElementsByClassName("remoteTM")) {
+                            el.innerText = secondsToHms(+new Date() / 1000 - startDate)
                         }
                     }
-                )
-            }).observe($(".ok")[0], {attributes: true});
-        }
+                }
+                if (document.getElementsByClassName("remoteTZ").length > 0 && document.getElementsByClassName("remoteTime").length > 0) {
+                    for (let el of document.getElementsByClassName("remoteTime")) {
+                        try {
+                            el.innerText = new Date().toLocaleTimeString("ru", {timeZone: $(el).parent().find('.remoteTZ')[0].innerText}).slice(0, -3)
+                        } catch {
+                            el.innerText = "???"
+                        }
+                    }
+                }
+            }, 1000)
 
-        if (!settings.ipApiLocalisation)
-            language = "en"
+            checkApi()
 
-        if (settings.hotkeys) {
-            document.removeEventListener('keyup', hotkeys)
-            document.addEventListener('keyup', hotkeys)
-        }
+            if (settings.hideLogo) {
+                try {
+                    document.getElementById("logo-link").style.display = "none"
+                } catch (e) {
+                    console.dir(e)
+                }
+            }
 
-        if (settings.skipMale || settings.skipFemale || settings.enableFaceApi) {
-            setTimeout(async () => {
-                console.time("faceapi: loading models")
-                await faceapi.nets.tinyFaceDetector.loadFromUri(chrome.runtime.getURL('resources/models'))
-                await faceapi.nets.ageGenderNet.loadFromUri(chrome.runtime.getURL('resources/models'))
-                console.timeEnd("faceapi: loading models")
+            if (settings.hideHeader) {
+                $("#header").hide()
+                app.style.height = "100%"
+                window.dispatchEvent(new Event('resize'));
+            }
 
-                console.time("faceapi: initial facedetect")
-                remoteFace.innerHTML = chrome.i18n.getMessage("initialFaceDetect")
-                let tempImage = document.createElement('img')
-                tempImage.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII="
-                await faceapi.detectAllFaces(tempImage, new faceapi.TinyFaceDetectorOptions()).withAgeAndGender()
-                console.timeEnd("faceapi: initial facedetect")
-                remoteFace.innerHTML = ""
+            if (settings.hideWatermark || settings.streamer) {
+                try {
+                    document.getElementsByClassName("remote-video__watermark")[0].style.display = "none"
+                } catch (e) {
+                    console.dir(e)
+                }
+            }
 
-                faceApiLoaded = true
+            if (settings.hideBanner || settings.streamer) {
+                try {
+                    document.getElementsByClassName("caption remote-video__info")[0].style.display = "none"
+                } catch (e) {
+                    console.dir(e)
+                }
+            }
 
-                tim = setTimeout(detectGender, 200)
-            }, 0)
-        }
+            if (settings.doNotReflect) {
+                $("#local-video").removeClass("video-container-local-video")
+            }
 
-        if (settings.risky && isDevMode()) {
-            if (settings.mirror || settings.mirrorAlt || settings.prikol) {
-                if (settings.prikol && isDevMode()) {
-                    const prikolV = document.createElement('video');
-                    prikolV.id = "prikol"
-                    prikolV.loop = "loop"
-                    prikolV.autoplay = "autoplay"
-                    prikolV.muted = true
-                    prikolV.src = chrome.runtime.getURL('resources/prikol.mp4');
-                    prikolV.width = 0
-                    prikolV.onload = () => s1.remove();
+            if (settings.doNotCover) {
+                $("#remote-video").css({"object-fit": "contain"})
+                // $(".preview").css({"background-size": "contain"})
+            }
 
-                    app.appendChild(prikolV);
+            if (settings.hideCamera) {
+                $("#local-video-wrapper")[0].style.display = "none"
+            }
+
+            setInterval(() => {
+                if (settings.skipFourSec) {
+                    try {
+                        if ((stage === 2) && (found + 4000 < Date.now())) {
+                            console.dir("Skipping due to loading time limit")
+                            document.getElementsByClassName('buttons__button start-button')[0].click()
+                            //settings.stats.countManSkip--
+                        }
+                    } catch (e) {
+                        //console.dir(e)
+                    }
+                }
+            }, 1000)
+
+            if (settings.autoResume) {
+                document.getElementById('overlay').style.background = "none"
+                // document.getElementById('overlay').style.position = "unset"
+
+                document.getElementById('local-video-warning-popup').style.filter = "opacity(0)"
+                new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                            if (mutation.attributeName === "class") {
+                                if (mutation.target.className.includes("disabled")) {
+                                    $(".ok").removeClass("disabled")
+                                    document.getElementsByClassName("video-warning__btn")[0].firstElementChild.click()
+                                }
+                            }
+                        }
+                    )
+                }).observe($(".ok")[0], {attributes: true});
+            }
+
+            if (!settings.ipApiLocalisation)
+                language = "en"
+
+            if (settings.hotkeys) {
+                document.removeEventListener('keyup', hotkeys)
+                document.addEventListener('keyup', hotkeys)
+            }
+
+            if (settings.skipMale || settings.skipFemale || settings.enableFaceApi) {
+                setTimeout(async () => {
+                    console.time("faceapi: loading models")
+                    await faceapi.nets.tinyFaceDetector.loadFromUri(chrome.runtime.getURL('resources/models'))
+                    await faceapi.nets.ageGenderNet.loadFromUri(chrome.runtime.getURL('resources/models'))
+                    console.timeEnd("faceapi: loading models")
+
+                    console.time("faceapi: initial facedetect")
+                    remoteFace.innerHTML = chrome.i18n.getMessage("initialFaceDetect")
+                    let tempImage = document.createElement('img')
+                    tempImage.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII="
+                    await faceapi.detectAllFaces(tempImage, new faceapi.TinyFaceDetectorOptions()).withAgeAndGender()
+                    console.timeEnd("faceapi: initial facedetect")
+                    remoteFace.innerHTML = ""
+
+                    faceApiLoaded = true
+
+                    tim = setTimeout(detectGender, 200)
+                }, 0)
+            }
+
+            if (settings.risky && isDevMode()) {
+                if (settings.mirror || settings.mirrorAlt || settings.prikol) {
+                    if (settings.prikol && isDevMode()) {
+                        const prikolV = document.createElement('video');
+                        prikolV.id = "prikol"
+                        prikolV.loop = "loop"
+                        prikolV.autoplay = "autoplay"
+                        prikolV.muted = true
+                        prikolV.src = chrome.runtime.getURL('resources/prikol.mp4');
+                        prikolV.width = 0
+                        prikolV.onload = () => s1.remove();
+
+                        app.appendChild(prikolV);
+                    }
+
+                    const s1 = document.createElement('script');
+                    s1.src = chrome.runtime.getURL('injection/camera-hijack.js');
+                    s1.onload = () => s1.remove();
+                    (document.head || document.documentElement).appendChild(s1);
                 }
 
-                const s1 = document.createElement('script');
-                s1.src = chrome.runtime.getURL('injection/camera-hijack.js');
-                s1.onload = () => s1.remove();
-                (document.head || document.documentElement).appendChild(s1);
+                if (settings.ws) {
+                    if (settings.wsconfig.theyskipsound) {
+                        skip = document.createElement("AUDIO");
+                        skip.id = "skip"
+                        skip.src = chrome.runtime.getURL('resources/audio/skip.mp3')
+                        document.body.appendChild(skip)
+                        skip.volume = 0.3
+                    }
+
+                    const purify = document.createElement('script');
+                    purify.src = chrome.runtime.getURL('libs/js/purify.min.js');
+                    purify.onload = () => wss.remove();
+                    (document.head || document.documentElement).appendChild(purify);
+
+                    const wss = document.createElement('script');
+                    wss.src = chrome.runtime.getURL('injection/ws.js');
+                    wss.onload = () => wss.remove();
+                    (document.head || document.documentElement).appendChild(wss);
+                }
             }
 
-            if (settings.ws) {
-                if (settings.wsconfig.theyskipsound) {
-                    skip = document.createElement("AUDIO");
-                    skip.id = "skip"
-                    skip.src = chrome.runtime.getURL('resources/audio/skip.mp3')
-                    document.body.appendChild(skip)
-                    skip.volume = 0.3
+            if (settings.streamer) {
+                if (settings.blurReport)
+                    document.getElementById("report-screen").style.filter = "blur(10px)"
+
+                if (settings.cover || settings.coverPreview || settings.coverNoise || settings.coverStop) {
+                    $(createElement('img', {
+                        src: settings.coverSrc,
+                        id: "cover",
+                        style: "height:100%; position: absolute; display:none"
+                    })).insertBefore("#remote-video")
+
+                    $(createElement('img', {
+                        src: settings.coverSrc,
+                        id: "cover2",
+                        style: "height:100%; position: absolute; transform: scaleX(-1)"
+                    })).insertBefore("#local-video")
+
+                    $(".remote-video__preview").insertBefore("#cover")
+
+                    $(".remote-video__noise").insertBefore("#cover")
                 }
 
-                const purify = document.createElement('script');
-                purify.src = chrome.runtime.getURL('libs/js/purify.min.js');
-                purify.onload = () => wss.remove();
-                (document.head || document.documentElement).appendChild(purify);
-
-                const wss = document.createElement('script');
-                wss.src = chrome.runtime.getURL('injection/ws.js');
-                wss.onload = () => wss.remove();
-                (document.head || document.documentElement).appendChild(wss);
-            }
-        }
-
-        if (settings.streamer) {
-            if (settings.blurReport)
-                document.getElementById("report-screen").style.filter = "blur(10px)"
-
-            if (settings.cover || settings.coverPreview || settings.coverNoise || settings.coverStop) {
-                $(createElement('img', {
-                    src: settings.coverSrc,
-                    id: "cover",
-                    style: "height:100%; position: absolute; display:none"
-                })).insertBefore("#remote-video")
-
-                $(createElement('img', {
-                    src: settings.coverSrc,
-                    id: "cover2",
-                    style: "height:100%; position: absolute; transform: scaleX(-1)"
-                })).insertBefore("#local-video")
-
-                $(".remote-video__preview").insertBefore("#cover")
-
-                $(".remote-video__noise").insertBefore("#cover")
-            }
-
-            if (settings.nsfw && isDevMode()) {
-                const nsfwjs = document.createElement('script');
-                nsfwjs.src = chrome.runtime.getURL('libs/js/nsfwjs.min.js');
-                nsfwjs.onload = () => {
-                    nsfwjs.remove()
+                if (settings.nsfw && isDevMode()) {
+                    const nsfwjs = document.createElement('script');
+                    nsfwjs.src = chrome.runtime.getURL('libs/js/nsfwjs.min.js');
+                    nsfwjs.onload = () => {
+                        nsfwjs.remove()
+                        const nsfw = document.createElement('script');
+                        nsfw.src = chrome.runtime.getURL('injection/streamer-mode.js');
+                        nsfw.onload = () => nsfw.remove();
+                        (document.head || document.documentElement).appendChild(nsfw);
+                    };
+                    (document.head || document.documentElement).appendChild(nsfwjs);
+                } else {
                     const nsfw = document.createElement('script');
                     nsfw.src = chrome.runtime.getURL('injection/streamer-mode.js');
                     nsfw.onload = () => nsfw.remove();
                     (document.head || document.documentElement).appendChild(nsfw);
-                };
-                (document.head || document.documentElement).appendChild(nsfwjs);
-            } else {
-                const nsfw = document.createElement('script');
-                nsfw.src = chrome.runtime.getURL('injection/streamer-mode.js');
-                nsfw.onload = () => nsfw.remove();
-                (document.head || document.documentElement).appendChild(nsfw);
+                }
             }
-        }
 
-        if (settings.darkMode)
-            (document.body || document.documentElement).appendChild(dark);
+            if (settings.darkMode)
+                (document.body || document.documentElement).appendChild(dark);
 
-        $(document).arrive(".tr-country", function (el) {
-            if (settings.skipwrongcountry) {
-                try {
-                    if (el.parentElement.className === "message-bubble") {
-                        let expectedCountry = "ZZ"
+            $(document).arrive(".tr-country", function (el) {
+                if (settings.skipwrongcountry) {
+                    try {
+                        if (el.parentElement.className === "message-bubble") {
+                            let expectedCountry = "ZZ"
 
-                        if ($(".country-filter-popup__country").filter(".all").filter(".selected").length == 0) {
-                            expectedCountry = $(".country-filter-popup__country").filter(".selected").children('span[data-tr]')[0].getAttribute('data-tr')
+                            if ($(".country-filter-popup__country").filter(".all").filter(".selected").length == 0) {
+                                expectedCountry = $(".country-filter-popup__country").filter(".selected").children('span[data-tr]')[0].getAttribute('data-tr')
+                            }
+
+                            let receivedCountry = el.dataset.tr
+                            if (expectedCountry !== "ZZ" && expectedCountry !== receivedCountry) {
+                                stopAndStart()
+                                console.dir(el)
+                                console.dir(`SKIPPED WRONG COUNTRY. EXPECTED: ${expectedCountry}, RECEIVED: ${receivedCountry}.`)
+                            }
                         }
-                        
-                        let receivedCountry = el.dataset.tr
-                        if (expectedCountry !== "ZZ" && expectedCountry !== receivedCountry) {
-                            stopAndStart()
-                            console.dir(el)
-                            console.dir(`SKIPPED WRONG COUNTRY. EXPECTED: ${expectedCountry}, RECEIVED: ${receivedCountry}.`)
-                        }
+                    } catch (e) {
+                        console.dir("SKIP WRONG COUNTRY EXCEPTION BEGIN")
+                        console.dir(e)
+                        console.dir("SKIP WRONG COUNTRY EXCEPTION END")
                     }
-                } catch (e) {
-                    console.dir("SKIP WRONG COUNTRY EXCEPTION BEGIN")
-                    console.dir(e)
-                    console.dir("SKIP WRONG COUNTRY EXCEPTION END")
                 }
-            }
-        })
+            })
 
-        new ResizeObserver(outputsize).observe(document.getElementById("overlay"))
+            new ResizeObserver(outputsize).observe(document.getElementById("overlay"))
 
-        const observer = new MutationObserver(onUpdateIP)
-        observer.observe(document.getElementById('remoteIP'), {attributes: true, childList: true, characterData: true});
+            const observer = new MutationObserver(onUpdateIP)
+            observer.observe(document.getElementById('remoteIP'), {
+                attributes: true,
+                childList: true,
+                characterData: true
+            });
 
-        var observer2 = new MutationObserver(onChangeStage)
-        observer2.observe(document.getElementById('remote-video-wrapper'), {attributes: true});
+            var observer2 = new MutationObserver(onChangeStage)
+            observer2.observe(document.getElementById('remote-video-wrapper'), {attributes: true});
 
-        if (!settings.swalInfoCompleted) {
-            showSwalInfo()
-        } else {
-            if (settings.lastVersion !== chrome.runtime.getManifest().version) {
-                showSwalChangelog(settings.lastVersion)
+            if (!settings.swalInfoCompleted) {
+                showSwalInfo()
             } else {
-                if ((+new Date() - settings.lastShowedDangerWarning) > 24 * 3600 * 1000 && settings.risky && isDevMode()) {
-                    showDangerWarning()
+                if (settings.lastVersion !== chrome.runtime.getManifest().version) {
+                    showSwalChangelog(settings.lastVersion)
+                } else {
+                    if ((+new Date() - settings.lastShowedDangerWarning) > 24 * 3600 * 1000 && settings.risky && isDevMode()) {
+                        showDangerWarning()
+                    }
                 }
             }
-        }
 
-        chrome.storage.sync.set({lastVersion: chrome.runtime.getManifest().version})
-    })
-});
+            chrome.storage.sync.set({lastVersion: chrome.runtime.getManifest().version})
+        })
+    });
+})

@@ -29,10 +29,10 @@ function hotkeys(e) {
             break;
     }
 }
-
-
-document.getElementsByClassName('buttons__button start-button')[0].addEventListener("click", (e) => {
-    if (e.shiftKey && !local.ips.includes(remoteIP.innerText)) {
-        syncBlackList()
-    }
+document.arrive(".buttons__button.start-button", {onceOnly: true, existing: true}, () => {
+    document.getElementsByClassName('buttons__button start-button')[0].addEventListener("click", (e) => {
+        if (e.shiftKey && !local.ips.includes(remoteIP.innerText)) {
+            syncBlackList()
+        }
+    })
 })

@@ -35,7 +35,8 @@ const showSwalChangelog = async function (version) {
         '1.6.0',
         '1.6.1',
         '1.6.2',
-        '1.6.3'
+        '1.6.3',
+        '1.6.4'
     ]
 
     const getGitHub = (tag, date) => {
@@ -74,7 +75,8 @@ const showSwalChangelog = async function (version) {
         getGitHub('v1.6.0', '(2022-11-17)'),
         getGitHub('v1.6.1', '(2022-11-25)'),
         getGitHub('v1.6.2', '(2023-01-15)'),
-        getGitHub('v1.6.3', '(2023-01-15)')
+        getGitHub('v1.6.3', '(2023-01-15)'),
+        getGitHub('v1.6.4', '(2023-03-26)')
     ]
 
     const values = {
@@ -494,7 +496,15 @@ const showSwalChangelog = async function (version) {
             '<b>Fixed \'check torrents\' function.</b><br>' +
             '<br>' +
             '<b>- Section \'IP\'.</b><br>' +
-            "— Fixed an incorrect locale detection that caused torrent checking to work incorrectly for some users."
+            "— Fixed an incorrect locale detection that caused torrent checking to work incorrectly for some users.",
+
+            // 1.6.4 (2023-03-26)
+            '<b>Urgent release fixing work on ome.tv.</b><br>' +
+            '<br>' +
+            '<b>- Information.</b><br>' +
+            '— Fixed a bug when the extension were not starting when the ome.tv website was loading slowly (videochatru.com worked fine).<br>' +
+            '— Of the thousands of people who noticed the error and decided to reinstall the extension, only two have reported it in <a style="text-decoration:none;" target="_blank" href="https://discord.gg/9jCuhYg55P">Discord</a>. Join the Discord server!<br>' +
+            '— This is an urgent temporary release, new version with result of ~300 hours of work will be released next week, unfortunately Google\'s slow support has delayed its release for the second week already.<br>'
         ],
         "ru": [
             // v0.1 (2021-09-27)
@@ -918,10 +928,17 @@ const showSwalChangelog = async function (version) {
             '<b>Фикс ошибки проверки торрентов.</b><br>' +
             '<br>' +
             '<b>- Раздел \'IP\'.</b><br>' +
-            '— Исправлено неправильное определении локали, из-за которой у некоторых пользователей неправильно работала проверка торрентов.'
+            '— Исправлено неправильное определении локали, из-за которой у некоторых пользователей неправильно работала проверка торрентов.',
+
+            // 1.6.4 (2023-03-26)
+            '<b>Срочный релиз, исправляющий работу на ome.tv.</b><br>' +
+            '<br>' +
+            '<b>- Информация.</b><br>' +
+            '— Исправлена ошибка при старте расширения при медленной загрузке сайта ome.tv (videochatru.com работал нормально).<br>' +
+            '— Из тысяч людей, которые заметили ошибку и решили переустановить расширение, в <a style="text-decoration:none;" target="_blank" href="https://discord.gg/YZKnbKGWen">Discord</a> о ней сообщило только два. Почему так? Присоединяйтесь к Discord серверу!<br>' +
+            '— Это срочный временный релиз, обновление с результатом ~300 часов работы будет выпущено на следующей неделе, к сожалению Google задерживает его выпуск уже вторую неделю.'
         ],
     }
-
 
     let index = steps.indexOf(version)
     if (steps.indexOf(version) + 1 < steps.length) {
